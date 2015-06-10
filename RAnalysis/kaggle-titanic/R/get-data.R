@@ -43,12 +43,45 @@ get.familySize <- function(df){
     return (familySize);
 }
 
+#' Get family size 2.
+#' @param df The data frame.
+#' @return List of family size.
+get.familySize2 <- function(df){
+    familySize2 = df$SibSp + df$Parch + 1;
+    familySize2[familySize2 > 3] = 3;
+    return (familySize2);
+}
+
+#' Get to whether the name contains bracket.
+#' @param names The list of names.
+#' @return List of booleans.
+get.specialName <- function(names){
+    specialName = grepl("\\(", names);
+    return (specialName);
+}
+
 #' Get whether it is a child.
 #' @param df The data frame.
 #' @return List of boolean to determine if it is a child.
 get.isChild <- function(df){
-    isChild = df$Age < 12;
+    isChild = df$Age < 18 & (df$SibSp > 0 || df$Parch > 0);
     return (isChild);
+}
+
+#' Get whether it is a young rich girl.
+#' @param df The data frame.
+#' @return List of boolean to determine if it is a young rich girl.
+get.isRichGirl <- function(df){
+    isRichGirl = df$Age < 30 & df$Sex == "female" & df$Pclass %in% c("1", "2");
+    return (isRichGirl);
+}
+
+#' Get whether it is a poor old guy.
+#' @param df The data frame.
+#' @return List of boolean to determine if it is a poor old guy.
+get.isPoorOld <- function(df){
+    isPoorOld = df$Age > 40 & df$Pclass %in% c("3");
+    return (isPoorOld);
 }
 
 #' Clean data frame "Embarked" information
@@ -97,7 +130,11 @@ clean.data <-function(df){
     df$Title = get.title.from(df$Name);
     df$Surname = get.surname.from(df$Name);
     df$FamilySize = get.familySize(df);
+    df$FamilySize2 = get.familySize2(df);
     df$IsChild = get.isChild(df);
+    df$SpecialName = get.specialName(df$Name);
+    df$IsRichGirl = get.isRichGirl(df);
+    df$IsPoorOld = get.isPoorOld(df);
     return (df);
 }
 

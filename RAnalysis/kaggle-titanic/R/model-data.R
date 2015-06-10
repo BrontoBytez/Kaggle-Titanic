@@ -11,7 +11,7 @@ split.data.rows <- function(df){
 #' Default formula
 #' @return The formula
 get.default.formula <- function(){
-    return (Survived~Age+Sex+Pclass+Title+Embarked+Fare+IsChild+FamilySize);
+    return (Survived~Age+Sex+Pclass+Title+Embarked+Fare+IsChild+FamilySize+IsRichGirl+IsPoorOld);
 }
 
 #' Get control function for train function.
@@ -61,8 +61,8 @@ glm.train <- function(formula, df, tune.grid = NULL){
     model = train(formula,
                   data = df,
                   method = "glm",
-                  metric = "ROC");
-                  # trControl = get.control());
+                  metric = "ROC",
+                  trControl = get.control());
     return (model);
 }
 
@@ -159,11 +159,13 @@ train.accuracy <- function(tune, df){
 #' @return The prediction.
 test.predict <- function(tune, df, fileName = NULL){
     Survived = predict(tune, df);
+    Survived = revalue(Survived, c("Survive" = "1", "Perish" = "0"));
     pred = as.data.frame(Survived);
     pred$PassengerId = df$PassengerId;
     fileName= sprintf("%s.csv", format(Sys.time(), "%Y%m%d%H%M%S"));
     fileName = sprintf("export/%s", fileName);
-    write.csv(pred[,c(2,1)], 
+    pred = pred[,c("PassengerId","Survived")];
+    write.csv(pred,
               file = fileName, 
               row.names = FALSE,
               quote = FALSE);
