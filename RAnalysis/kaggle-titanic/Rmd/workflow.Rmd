@@ -1,0 +1,94 @@
+Kaggle Titantic Workflow
+======================================
+
+The workflow is to introduce the usage of the package *kaggletitanic*. We will go through the process of 
+
+1. Data munging and cleaning
+2. Building model
+3. Model evaluation
+4. Data prediction
+
+
+# Data munging and cleaning
+
+Load the library and then train and test data.
+```{r}
+library("kaggletitanic")
+train.df = get.train.data()
+test.df = get.test.data()
+
+```
+
+In functions `get.train.data` and `get.train.data`, the data is cleaned, e.g. all the gaps are filled and new variables are added.
+
+Split the training data into two sets. Current the default splitting is 80% to the batched and another 20% to the unbatched.
+```{r}
+splitted.rows.index = split.data.rows(train.df);
+train.df.batch = train.df[splitted.rows.index,];
+train.df.unbatch = train.df[-splitted.rows.index,];
+```
+
+
+# Building model
+After cleaning the data, we can then work to build the model. There is a default formula we can always employ by `get.default.formula`
+```{r}
+get.default.formula()
+
+```
+
+
+The package contains a few learning method:
+
+### Generalized linear model
+
+```{r warning=FALSE, error=FALSE, message=FALSE, eval=c(2)}
+glm.tune = glm.train(get.default.formula(), train.df.batch);
+glm.tune
+
+```
+
+### Gradient boosting model
+
+```{r warning=FALSE, error=FALSE, message=FALSE, eval=c(2)}
+gbm.tune = gbm.train(get.default.formula(), train.df.batch);
+
+```
+
+### Other models
+
+```{r warning=FALSE, error=FALSE, message=FALSE}
+## Stochastic boosting
+##ada.tune = ada.train(get.default.formula(), train.df.batch);
+## Support vector machines
+##svm.tune = svm.train(get.default.formula(), train.df.batch);
+
+```
+
+# Model Evalution
+After running models, we can then use them to predict the unbatched training data. Compare the results from the unbatched training data, we can have a brief understanding which model performs better.
+
+```{r}
+#train.accuracy(gbm.tune, train.df.unbatch)
+#train.accuracy(svm.tune, train.df.unbatch)
+
+```
+
+
+1. Accuracy: Measures the total percentage the model predicts correctly.
+
+2. 95% CI: 95% confidence interval. The narrow the range the more stable the model.
+
+3. Sensitivity: Measures the correct prediction rate of Perish.
+
+4. Specificity: Measures the correct prediction rate of Survive.
+
+# Data Prediction
+
+After selecting the best model, assuming `gbm` performs the best, we can then predict the test data on it.
+
+```{r}
+#test.predict(gbm.tune, test.df)
+
+```
+
+The prediction is finally generated under the directory `data`.

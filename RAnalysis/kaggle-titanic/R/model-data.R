@@ -56,7 +56,7 @@ get.ada.grid <- function(){
 #' @param formula The dependence formula.
 #' @param df The data frame.
 #' @return The model.
-glm.train <- function(formula, df, tune.grid = NULL){
+glm.train <- function(formula, df){
     set.seed(35);
     model = train(formula,
                   data = df,
