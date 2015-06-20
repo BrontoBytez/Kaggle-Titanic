@@ -58,9 +58,9 @@ gbm.tune = gbm.train(get.default.formula(), train.df.batch);
 
 ```{r warning=FALSE, error=FALSE, message=FALSE}
 ## Stochastic boosting
-##ada.tune = ada.train(get.default.formula(), train.df.batch);
+ada.tune = ada.train(get.default.formula(), train.df.batch);
 ## Support vector machines
-##svm.tune = svm.train(get.default.formula(), train.df.batch);
+svm.tune = svm.train(get.default.formula(), train.df.batch);
 
 ```
 
@@ -68,8 +68,8 @@ gbm.tune = gbm.train(get.default.formula(), train.df.batch);
 After running models, we can then use them to predict the unbatched training data. Compare the results from the unbatched training data, we can have a brief understanding which model performs better.
 
 ```{r}
-#train.accuracy(gbm.tune, train.df.unbatch)
-#train.accuracy(svm.tune, train.df.unbatch)
+train.accuracy(gbm.tune, train.df.unbatch)
+train.accuracy(svm.tune, train.df.unbatch)
 
 ```
 
@@ -87,7 +87,7 @@ After running models, we can then use them to predict the unbatched training dat
 After selecting the best model, assuming `gbm` performs the best, we can then predict the test data on it.
 
 ```{r}
-#test.predict(gbm.tune, test.df)
+test.pred = test.predict(gbm.tune, test.df)
 
 ```
 

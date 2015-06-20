@@ -61,140 +61,119 @@ img {
 
 
 
-<div id="kaggle-titantic-workflow" class="section level1">
-<h1>Kaggle Titantic Workflow</h1>
-<p>The workflow is to introduce the usage of the package <em>kaggletitanic</em>. We will go through the process of</p>
+<div id="kaggle-titantic-data-cleaning" class="section level1">
+<h1>Kaggle Titantic Data Cleaning</h1>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In the package, when the data is imported, it follows the procedure:</p>
 <ol style="list-style-type: decimal">
-<li>Data munging and cleaning</li>
-<li>Building model</li>
-<li>Model evaluation</li>
-<li>Data prediction</li>
+<li><p>Get data from csv file</p></li>
+<li><p>Fill data gap</p></li>
+<li><p>Rename columns</p></li>
+<li><p>Add new parameters</p></li>
 </ol>
+<div id="fill-data-gap" class="section level2">
+<h2>Fill data gap</h2>
+<div id="embarked" class="section level3">
+<h3>Embarked</h3>
+<p>All <code>na</code> values of “Embarked” is mapped to “S”</p>
+<pre class="r"><code>clean.data.embarked &lt;-
+function(df){
+    df$Embarked[is.na(df$Embarked)] = &quot;S&quot;;
+    return (df);
+}</code></pre>
 </div>
-<div id="data-munging-and-cleaning" class="section level1">
-<h1>Data munging and cleaning</h1>
-<p>Load the library and then train and test data.</p>
-<pre class="r"><code>library(&quot;kaggletitanic&quot;)
-train.df = get.train.data()
-test.df = get.test.data()</code></pre>
-<p>In functions <code>get.train.data</code> and <code>get.train.data</code>, the data is cleaned, e.g. all the gaps are filled and new variables are added.</p>
-<p>Split the training data into two sets. Current the default splitting is 80% to the batched and another 20% to the unbatched.</p>
-<pre class="r"><code>splitted.rows.index = split.data.rows(train.df);
-train.df.batch = train.df[splitted.rows.index,];
-train.df.unbatch = train.df[-splitted.rows.index,];</code></pre>
+<div id="fare" class="section level3">
+<h3>Fare</h3>
+<p>For fares less than $0.1, they are mapped into the median.</p>
+<pre class="r"><code>clean.data.fare &lt;-
+function(df){
+    df$Fare[df$Fare &lt; 0.01] = 37.5;
+    df$Fare[is.na(df$Fare)] = 37.5;
+    return (df);
+}</code></pre>
 </div>
-<div id="building-model" class="section level1">
-<h1>Building model</h1>
-<p>After cleaning the data, we can then work to build the model. There is a default formula we can always employ by <code>get.default.formula</code></p>
-<pre class="r"><code>get.default.formula()</code></pre>
-<pre><code>## Survived ~ Age + Sex + Pclass + Title + Embarked + Fare + IsChild + 
-##     FamilySize + IsRichGirl + IsPoorOld
-## &lt;environment: 0x000000001edae840&gt;</code></pre>
-<p>The package contains a few learning method:</p>
-<div id="generalized-linear-model" class="section level3">
-<h3>Generalized linear model</h3>
-<pre class="r"><code>## glm.tune = glm.train(get.default.formula(), train.df.batch);
-glm.tune</code></pre>
-<pre><code>## Generalized Linear Model 
-## 
-## 714 samples
-##  19 predictor
-##   2 classes: 'Perish', 'Survive' 
-## 
-## No pre-processing
-## Resampling: Cross-Validated (10 fold, repeated 10 times) 
-## 
-## Summary of sample sizes: 643, 643, 643, 642, 643, 643, ... 
-## 
-## Resampling results
-## 
-##   ROC        Sens       Spec       ROC SD      Sens SD     Spec SD   
-##   0.8747168  0.8965909  0.7405556  0.04264874  0.04538275  0.06310285
-## 
-## </code></pre>
-<pre class="r"><code>## </code></pre>
+<div id="age" class="section level3">
+<h3>Age</h3>
+<p>The missing age is filled by median, grouped by sex.</p>
+<pre class="r"><code>clean.data.age &lt;-
+function(df){
+    df$Age[is.na(df$Age) &amp; df$Sex == &quot;male&quot;] = 29;
+    df$Age[is.na(df$Age) &amp; df$Sex == &quot;female&quot;] = 27;
+    return (df);
+}</code></pre>
 </div>
-<div id="gradient-boosting-model" class="section level3">
-<h3>Gradient boosting model</h3>
-<pre class="r"><code>## gbm.tune = gbm.train(get.default.formula(), train.df.batch);</code></pre>
-</div>
-<div id="other-models" class="section level3">
-<h3>Other models</h3>
-<pre class="r"><code>## Stochastic boosting
-ada.tune = ada.train(get.default.formula(), train.df.batch);
-## Support vector machines
-svm.tune = svm.train(get.default.formula(), train.df.batch);</code></pre>
+<div id="survived" class="section level3">
+<h3>Survived</h3>
+<p>The value of “1” and “0” is mapped to “Survive” and “Perish”.</p>
+<pre class="r"><code>clean.data.survived &lt;-
+function(df){
+    df$Survived = revalue(df$Survived, c(&quot;1&quot; = &quot;Survive&quot;, &quot;0&quot; = &quot;Perish&quot;));
+    return (df);
+}</code></pre>
 </div>
 </div>
-<div id="model-evalution" class="section level1">
-<h1>Model Evalution</h1>
-<p>After running models, we can then use them to predict the unbatched training data. Compare the results from the unbatched training data, we can have a brief understanding which model performs better.</p>
-<pre class="r"><code>train.accuracy(gbm.tune, train.df.unbatch)</code></pre>
-<pre><code>## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction Perish Survive
-##    Perish      93      19
-##    Survive     16      49
-##                                           
-##                Accuracy : 0.8023          
-##                  95% CI : (0.7359, 0.8582)
-##     No Information Rate : 0.6158          
-##     P-Value [Acc &gt; NIR] : 7.432e-08       
-##                                           
-##                   Kappa : 0.5786          
-##  Mcnemar's Test P-Value : 0.7353          
-##                                           
-##             Sensitivity : 0.8532          
-##             Specificity : 0.7206          
-##          Pos Pred Value : 0.8304          
-##          Neg Pred Value : 0.7538          
-##              Prevalence : 0.6158          
-##          Detection Rate : 0.5254          
-##    Detection Prevalence : 0.6328          
-##       Balanced Accuracy : 0.7869          
-##                                           
-##        'Positive' Class : Perish          
-## </code></pre>
-<pre class="r"><code>train.accuracy(svm.tune, train.df.unbatch)</code></pre>
-<pre><code>## Confusion Matrix and Statistics
-## 
-##           Reference
-## Prediction Perish Survive
-##    Perish      96      22
-##    Survive     13      46
-##                                           
-##                Accuracy : 0.8023          
-##                  95% CI : (0.7359, 0.8582)
-##     No Information Rate : 0.6158          
-##     P-Value [Acc &gt; NIR] : 7.432e-08       
-##                                           
-##                   Kappa : 0.5714          
-##  Mcnemar's Test P-Value : 0.1763          
-##                                           
-##             Sensitivity : 0.8807          
-##             Specificity : 0.6765          
-##          Pos Pred Value : 0.8136          
-##          Neg Pred Value : 0.7797          
-##              Prevalence : 0.6158          
-##          Detection Rate : 0.5424          
-##    Detection Prevalence : 0.6667          
-##       Balanced Accuracy : 0.7786          
-##                                           
-##        'Positive' Class : Perish          
-## </code></pre>
+<div id="add-new-parameters" class="section level2">
+<h2>Add new parameters</h2>
+<div id="title" class="section level3">
+<h3>Title</h3>
+<p>Some uncommon titles are mapped into common ones:</p>
 <ol style="list-style-type: decimal">
-<li><p>Accuracy: Measures the total percentage the model predicts correctly.</p></li>
-<li><p>95% CI: 95% confidence interval. The narrow the range the more stable the model.</p></li>
-<li><p>Sensitivity: Measures the correct prediction rate of Perish.</p></li>
-<li><p>Specificity: Measures the correct prediction rate of Survive.</p></li>
+<li><p>“the Countess” and “Ms” -&gt; “Mrs”</p></li>
+<li><p>“Mlle” and “Mme” -&gt; “Miss”</p></li>
+<li><p>Titles other than “Master”, “Miss”, “Mr” and “Mrs” -&gt; “Noble”</p></li>
 </ol>
+<pre class="r"><code>get.title.from &lt;-
+function(names){
+    title = substr(names, regexpr(&quot;,&quot;, names)+2, regexpr(&quot;\\.&quot;, names)-1);
+    title[which(title %in% c(&quot;the Countess&quot;, &quot;Ms&quot;))] = &quot;Mrs&quot;;
+    title[which(title %in% c(&quot;Mlle&quot;, &quot;Mme&quot;))] = &quot;Miss&quot;;
+#     title[which(title %in% c(&quot;Capt&quot;, &quot;Col&quot;, &quot;Don&quot;, &quot;Dr&quot;,
+#                               &quot;Jonkheer&quot;, &quot;Lady&quot;, &quot;Major&quot;, 
+#                               &quot;Rev&quot;, &quot;Sir&quot; ))] = &quot;Noble&quot;;
+    title[-which(title %in% c(&quot;Master&quot;, &quot;Miss&quot;, &quot;Mr&quot;, &quot;Mrs&quot;))] = &quot;Noble&quot;;
+    title = as.factor(title);
+    return (title);
+}</code></pre>
 </div>
-<div id="data-prediction" class="section level1">
-<h1>Data Prediction</h1>
-<p>After selecting the best model, assuming <code>gbm</code> performs the best, we can then predict the test data on it.</p>
-<pre class="r"><code>test.pred = test.predict(gbm.tune, test.df)</code></pre>
-<p>The prediction is finally generated under the directory <code>data</code>.</p>
+<div id="family-size" class="section level3">
+<h3>Family size</h3>
+<p>Familiy size is calculated by adding “SibSp”, “Parch” and then incremented by 1.</p>
+<pre class="r"><code>get.familySize &lt;-
+function(df){
+    familySize = df$SibSp + df$Parch + 1;
+    return (familySize);
+}</code></pre>
+</div>
+<div id="children" class="section level3">
+<h3>Children</h3>
+<p>From the analysis the survival rate of children is high. “IsChild” is mapped if the age is less than 18 and family size is more than 1.</p>
+<pre class="r"><code>get.isChild &lt;-
+function(df){
+    isChild = df$Age &lt; 18 &amp; (df$SibSp &gt; 0 || df$Parch &gt; 0);
+    return (isChild);
+}</code></pre>
+</div>
+<div id="rich-girl" class="section level3">
+<h3>Rich girl</h3>
+<p>From the analysis the survival rate of a first and second class young woman is high. “IsRichGirl” is mapped if a woman younger than 30 is on first and second class.</p>
+<pre class="r"><code>get.isRichGirl &lt;-
+function(df){
+    isRichGirl = df$Age &lt; 30 &amp; df$Sex == &quot;female&quot; &amp; df$Pclass %in% c(&quot;1&quot;, &quot;2&quot;);
+    return (isRichGirl);
+}</code></pre>
+</div>
+<div id="poor-and-old" class="section level3">
+<h3>Poor and old</h3>
+<p>From the analysis a third class poor guy is probably passed away. “IsPoorOld” is mapped if age is higher than 40 and he stayed on third class.</p>
+<pre class="r"><code>get.isPoorOld &lt;-
+function(df){
+    isPoorOld = df$Age &gt; 40 &amp; df$Pclass %in% c(&quot;3&quot;);
+    return (isPoorOld);
+}</code></pre>
+</div>
+</div>
 </div>
 
 
