@@ -1,0 +1,9 @@
+Package: kaggletitanic
+Type: Package
+Title: kaggle-titanic
+Version: 1.0
+Date: 2015-05-21
+Author: Gavin.Chan 
+Maintainer: Gavin.Chan <gavincyi@gmail.com>
+Description: The package for Kaggle competition "Titanic"
+License: GPL version 2 or newer

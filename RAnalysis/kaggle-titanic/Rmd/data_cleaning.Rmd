@@ -1,0 +1,100 @@
+Kaggle Titantic Data Cleaning
+======================================
+
+# Introduction
+
+In the package, when the data is imported, it follows the procedure:
+
+1. Get data from csv file
+
+2. Fill data gap
+
+3. Rename columns
+
+4. Add new parameters
+
+
+## Fill data gap
+
+### Embarked
+
+All `na` values of "Embarked" is mapped to "S"
+
+```{r code = capture.output(dump('clean.data.embarked', ''))}
+
+```
+
+### Fare
+
+For fares less than $0.1, they are mapped into the median.
+
+```{r code = capture.output(dump('clean.data.fare', ''))}
+
+```
+
+### Age
+
+The missing age is filled by median, grouped by sex.
+
+```{r code = capture.output(dump('clean.data.age', ''))}
+
+```
+
+### Survived
+
+The value of "1" and "0" is mapped to "Survive" and "Perish".
+
+
+```{r code = capture.output(dump('clean.data.survived', ''))}
+
+```
+
+
+## Add new parameters
+
+### Title
+
+Some uncommon titles are mapped into common ones:
+
+1. "the Countess" and "Ms" -> "Mrs"
+
+2. "Mlle" and "Mme" -> "Miss"
+
+3. Titles other than "Master", "Miss", "Mr" and "Mrs" -> "Noble"
+
+```{r code = capture.output(dump('get.title.from', ''))}
+
+```
+
+### Family size
+
+Familiy size is calculated by adding "SibSp", "Parch" and then incremented by 1.
+
+```{r code = capture.output(dump('get.familySize', ''))}
+
+```
+
+### Children
+
+From the analysis the survival rate of children is high. "IsChild" is mapped if the age is less than 18 and family size is more than 1.
+
+```{r code = capture.output(dump('get.isChild', ''))}
+
+```
+
+### Rich girl
+
+From the analysis the survival rate of a first and second class young woman is high. "IsRichGirl" is mapped if a woman younger than 30 is on first and second class.
+
+
+```{r code = capture.output(dump('get.isRichGirl', ''))}
+
+```
+
+### Poor and old
+
+From the analysis a third class poor guy is probably passed away. "IsPoorOld" is mapped if age is higher than 40 and he stayed on third class.
+
+```{r code = capture.output(dump('get.isPoorOld', ''))}
+
+```
