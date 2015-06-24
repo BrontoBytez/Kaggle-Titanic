@@ -84,6 +84,22 @@ get.isPoorOld <- function(df){
     return (isPoorOld);
 }
 
+#' Get whether it is a noble.
+#' @param df The data frame.
+#' @return List of boolean to determine if it is a noble.
+get.isNoble <- function(df){
+    isNoble = df$Title != "Mr" & df$Pclass %in% c("1", "2");
+    return (isNoble);
+}
+
+#' Get whether the cabin is na.
+#' @param df The data frame.
+#' @return List of boolean to determine if the cabin is na.
+get.isNaCabin <- function(df){
+    IsNaCabin = is.na(df$Cabin);
+    return (IsNaCabin);
+}
+
 #' Clean data frame "Embarked" information
 #' @param The data frame.
 #' @return The data frame.
@@ -135,6 +151,8 @@ clean.data <-function(df){
     df$SpecialName = get.specialName(df$Name);
     df$IsRichGirl = get.isRichGirl(df);
     df$IsPoorOld = get.isPoorOld(df);
+    df$IsNoble = get.isNoble(df);
+    df$IsNaCabin = get.isNaCabin(df);
     return (df);
 }
 

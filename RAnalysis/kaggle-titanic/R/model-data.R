@@ -11,7 +11,7 @@ split.data.rows <- function(df){
 #' Default formula
 #' @return The formula
 get.default.formula <- function(){
-    return (Survived~Age+Sex+Pclass+Title+Embarked+Fare+IsChild+FamilySize+IsRichGirl+IsPoorOld);
+    return (Survived~Age+Sex+Pclass+Title+Embarked+FamilySize+IsNoble+IsNaCabin);
 }
 
 #' Get control function for train function.
@@ -28,10 +28,10 @@ get.control <- function(){
 #' Get gbm tune grid.
 #' @return The tune grid.
 get.gbm.grid <- function(){
-    gbm.grid = expand.grid(n.trees = 80:200,
-                          shrinkage = seq(0,1,0.05),
-                          n.minobsinnode = 8:15,
-                          interaction.depth = 1:5);
+    gbm.grid = expand.grid(n.trees = c(50, 100, 150, 200),
+                          shrinkage = c(0.1, 0.001, 0.0005),
+                          n.minobsinnode = c(5, 10, 15),
+                          interaction.depth = c(1, 3, 5));
     return (gbm.grid);
 }
 
@@ -52,6 +52,17 @@ get.ada.grid <- function(){
     return (ada.grid);
 }
 
+#' Simple generalized linear model
+#' @param formula The dependence formula.
+#' @param df The data frame.
+#' @return The model.
+simple.glm.train <- function(formula, df){
+    set.seed(35);
+    model = glm(formula, data = df, family = binomial("logit"));
+    return (model);
+}
+
+
 #' Generalized linear model
 #' @param formula The dependence formula.
 #' @param df The data frame.
@@ -63,6 +74,7 @@ glm.train <- function(formula, df){
                   method = "glm",
                   metric = "ROC",
                   trControl = get.control());
+#     model = glm(formula, data = df, family = binomial("logit"));
     return (model);
 }
 
