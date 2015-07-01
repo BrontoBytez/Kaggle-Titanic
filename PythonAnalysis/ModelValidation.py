@@ -1,6 +1,7 @@
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve, roc_auc_score, auc
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import sem
 
 def print_model_information(model_name, formula, shape):
     print(model_name, formula,shape)
@@ -11,6 +12,7 @@ def model_accuracy(model_name, predictions, actual):
 def print_roc_curve(model_name, predictions, actual):
     print('ROC Curve for model: ', model_name)
     false_positive_rate, true_positive_rate, thresholds = roc_curve(actual, predictions)
+    true_negative_rate = 1 - false_positive_rate
     roc_auc = auc(false_positive_rate, true_positive_rate)    
     print('ROC Area Under Curve Score: ', roc_auc_score(actual, predictions))
     plt.title('Receiver Operating Characteristic')
@@ -22,6 +24,8 @@ def print_roc_curve(model_name, predictions, actual):
     plt.ylabel('True Positive Rate')
     plt.xlabel('False Positive Rate')
     plt.show()
+    print('Specificity (True Negative Rate): ', true_negative_rate)
+    print('Sensitivity (True Positive Rate): ', true_positive_rate)
     
 def print_confusion_matrix(model_name, predictions, actual, targetNames, title='Confusion Matrix', cmap=plt.cm.Blues):
     matrix = confusion_matrix(actual, predictions)
@@ -35,3 +39,24 @@ def print_confusion_matrix(model_name, predictions, actual, targetNames, title='
     plt.ylabel('True label')
     plt.xlabel('Predicted label') 
     plt.show()
+    
+def bootstrap_ROC():
+    y_pred = results['randomForest']
+    y_true = randomForestTestingY['Survived']
+    print("Original ROC area: {:0.3f}".format(roc_auc_score(y_true, y_pred)))
+    n_bootstraps = 1000
+    rng_seed = 42  # control reproducibility
+    bootstrapped_scores = []
+    
+    rng = np.random.RandomState(rng_seed)
+    for i in range(n_bootstraps):
+        # bootstrap by sampling with replacement on the prediction indices
+        indices = rng.random_integers(0, len(y_pred) - 1, len(y_pred))
+        if len(np.unique(y_true[indices])) < 2:
+            # We need at least one positive and one negative sample for ROC AUC
+            # to be defined: reject the sample
+            continue
+        score = roc_auc_score(y_true, y_pred)
+        bootstrapped_scores.append(score)
+        print("Bootstrap #{} ROC area: {:0.3f}".format(i + 1, score))
+
