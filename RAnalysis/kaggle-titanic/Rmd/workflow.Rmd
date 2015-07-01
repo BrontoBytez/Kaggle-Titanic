@@ -41,7 +41,7 @@ The package contains a few learning method:
 
 ### Generalized linear model
 
-```{r warning=FALSE, error=FALSE, message=FALSE, eval=c(2)}
+```{r warning=FALSE, error=FALSE, message=FALSE}
 glm.tune = glm.train(get.default.formula(), train.df.batch);
 glm.tune
 
@@ -49,8 +49,8 @@ glm.tune
 
 ### Gradient boosting model
 
-```{r warning=FALSE, error=FALSE, message=FALSE, eval=c(2)}
-gbm.tune = gbm.train(get.default.formula(), train.df.batch);
+```{r warning=FALSE, error=FALSE, message=FALSE, results="hide"}
+gbm.tune = gbm.train(get.default.formula(), train.df.batch, get.gbm.grid());
 
 ```
 
@@ -65,6 +65,8 @@ svm.tune = svm.train(get.default.formula(), train.df.batch);
 ```
 
 # Model Evalution
+
++ Confusion matrix and statistics
 After running models, we can then use them to predict the unbatched training data. Compare the results from the unbatched training data, we can have a brief understanding which model performs better.
 
 ```{r}
@@ -82,11 +84,35 @@ train.accuracy(svm.tune, train.df.unbatch)
 
 4. Specificity: Measures the correct prediction rate of Survive.
 
++ ROC
+
+We can also plot the roc curves on the models.
+
+```{r}
+glm.roc = get.roc(glm.tune, train.df.unbatch)
+gbm.roc = get.roc(gbm.tune, train.df.unbatch)
+rf.roc = get.roc(rf.tune, train.df.unbatch)
+ada.roc = get.roc(ada.tune, train.df.unbatch)
+svm.roc = get.roc(svm.tune, train.df.unbatch)
+
+```
+
+```{r message = FALSE, results='hide'}
+library("pROC")
+plot(glm.roc, type="S")
+plot(gbm.roc, add=TRUE, col="blue")
+plot(rf.roc, add=TRUE, col="green")
+plot(ada.roc, add=TRUE, col="red")
+plot(svm.roc, add=TRUE, col="yellow")
+
+```
+
+
 # Data Prediction
 
 After selecting the best model, assuming `gbm` performs the best, we can then predict the test data on it.
 
-```{r}
+```{r eval = FALSE}
 test.pred = test.predict(gbm.tune, test.df)
 
 ```
