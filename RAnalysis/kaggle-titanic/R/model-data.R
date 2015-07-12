@@ -11,7 +11,7 @@ split.data.rows <- function(df){
 #' Default formula
 #' @return The formula
 get.default.formula <- function(){
-    return (Survived~Age+Sex+Pclass+Title+Embarked+FamilySize+IsNoble+IsNaCabin);
+    return (Survived~Sex+Pclass+Title2+FamilySize+IsNoble+Embarked+Age+IsNaCabin+IsPoorOld+IsRichGirl+Fare2);
 }
 
 #' Get control function for train function.
@@ -50,6 +50,13 @@ get.ada.grid <- function(){
                            .maxdepth = c(4, 8),
                            .nu = c(0.1, 1));
     return (ada.grid);
+}
+
+#' Get net tune grid.
+#' @return The tune grid.
+get.net.grid <- function(){
+    net.grid = expand.grid(.decay = c(0.5, 0.1), .size = c(3, 6, 9));
+    return (net.grid);
 }
 
 #' Simple generalized linear model
@@ -145,6 +152,21 @@ ada.train <- function(formula, df){
                   method = "ada",
                   metric = "ROC",
                   tuneGrid = get.ada.grid(),
+                  trControl = get.control());
+    return (model);
+}
+
+#' Neural network model training.
+#' @param formula The dependence formula.
+#' @param df The data frame.
+#' @return The model.
+net.train <- function(formula, df){
+    set.seed(35);
+    model = train(formula,
+                  data = df,
+                  method = "nnet",
+                  metric = "ROC",
+                  tuneGrid = get.net.grid(),
                   trControl = get.control());
     return (model);
 }

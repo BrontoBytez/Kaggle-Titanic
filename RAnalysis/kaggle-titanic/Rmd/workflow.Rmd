@@ -56,11 +56,14 @@ gbm.tune = gbm.train(get.default.formula(), train.df.batch, get.gbm.grid());
 
 ### Other models
 
-```{r warning=FALSE, error=FALSE, message=FALSE}
+```{r warning=FALSE, error=FALSE, message=FALSE, results="hide"}
 ## Stochastic boosting
 ada.tune = ada.train(get.default.formula(), train.df.batch);
 ## Support vector machines
 svm.tune = svm.train(get.default.formula(), train.df.batch);
+## Neural network model
+net.tune = net.train(get.default.formula(), train.df.batch);
+
 
 ```
 
@@ -94,6 +97,7 @@ gbm.roc = get.roc(gbm.tune, train.df.unbatch)
 rf.roc = get.roc(rf.tune, train.df.unbatch)
 ada.roc = get.roc(ada.tune, train.df.unbatch)
 svm.roc = get.roc(svm.tune, train.df.unbatch)
+net.roc = get.roc(net.tune, train.df.unbatch)
 
 ```
 
@@ -104,6 +108,7 @@ plot(gbm.roc, add=TRUE, col="blue")
 plot(rf.roc, add=TRUE, col="green")
 plot(ada.roc, add=TRUE, col="red")
 plot(svm.roc, add=TRUE, col="yellow")
+plot(net.roc, add=TRUE, col="purple")
 
 ```
 

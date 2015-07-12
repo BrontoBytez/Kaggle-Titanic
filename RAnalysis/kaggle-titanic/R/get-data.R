@@ -28,6 +28,18 @@ get.title.from <- function(names){
     return (title);
 }
 
+#' Get title from names.
+#' @param names A list of names
+#' @return A list of titles.
+get.title2.from <- function(names){
+    title2 = substr(names, regexpr(",", names)+2, regexpr("\\.", names)-1);
+    title2[which(title2 %in% c("Mme", "Mlle"))] = "Mlle";
+    title2[which(title2 %in% c("Capt", "Don", "Major", "Sir", "Col"))] = "Sir";
+    title2[which(title2 %in% c("Dona", "Lady", "the Countess", "Jonkheer"))] = "Lady";
+    title2 = as.factor(title2);
+    return (title2);
+}
+
 #' Get surname from names.
 #' @param names A list of names
 #' @return A list of surnames.
@@ -48,7 +60,10 @@ get.familySize <- function(df){
 #' @return List of family size.
 get.familySize2 <- function(df){
     familySize2 = df$SibSp + df$Parch + 1;
-    familySize2[familySize2 > 3] = 3;
+    familySize2[1:length(familySize2)] = "Small";
+    familySize2[df$FamilySize >= 3 & df$FamilySize < 6] = "Medium";
+    familySize2[df$FamilySize >= 6] = "Large";
+    familySize2 = as.factor(familySize2)
     return (familySize2);
 }
 
@@ -100,6 +115,20 @@ get.isNaCabin <- function(df){
     return (IsNaCabin);
 }
 
+#' Get engineered fare.
+#' @param df The data frame.
+#' @return List of grouped fare.
+get.fare2 <- function(df){
+    fare2 = df$Fare;
+    fare2[1:length(fare2)] = 'more50';
+    fare2[df$Fare < 50 & df$Fare >= 30] = 'f30t50';
+    fare2[df$Fare < 30 & df$Fare >= 10] = 'f10t30';
+    fare2[df$Fare < 10]  = 'less10';
+    fare2 = as.factor(fare2);
+    return (fare2);
+}
+
+
 #' Clean data frame "Embarked" information
 #' @param The data frame.
 #' @return The data frame.
@@ -144,6 +173,7 @@ clean.data <-function(df){
     df = clean.data.fare(df);
     df = clean.data.age(df);
     df$Title = get.title.from(df$Name);
+    df$Title2= get.title2.from(df$Name);
     df$Surname = get.surname.from(df$Name);
     df$FamilySize = get.familySize(df);
     df$FamilySize2 = get.familySize2(df);
@@ -153,6 +183,7 @@ clean.data <-function(df){
     df$IsPoorOld = get.isPoorOld(df);
     df$IsNoble = get.isNoble(df);
     df$IsNaCabin = get.isNaCabin(df);
+    df$Fare2 = get.fare2(df);
     return (df);
 }
 
